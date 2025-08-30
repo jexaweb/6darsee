@@ -13,13 +13,14 @@ import ProtectedRoutes from "./components/ProtectedRoutes";
 import Home from "./pages/Home";
 
 import { action as RegisterAction } from "./pages/Register";
+import { action as LoginAction } from "./pages/Login";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "./firebase/config";
 import { useEffect } from "react";
-import { login } from "./app/features/userSlice";
+import { isAuthReady, login } from "./app/features/userSlice";
 
 function App() {
-  const { user } = useSelector((store) => store.user);
+  const { user, authReady } = useSelector((store) => store.user);
   const dispatch = useDispatch();
   const routes = createBrowserRouter([
     {
@@ -39,6 +40,7 @@ function App() {
     {
       path: "/login",
       element: user ? <Navigate to="/" /> : <Login />,
+      action: LoginAction,
     },
     {
       path: "/register",
@@ -46,13 +48,16 @@ function App() {
       action: RegisterAction,
     },
   ]);
-  // useEffect(() => {
-  //   onAuthStateChanged(auth, (user) => {
-  //     dispatch(login(user));
-  //   });
-  // }, []);
+  useEffect(() => {
+    onAuthStateChanged(auth, (user) => {
+      if (user?.displayName) {
+        dispatch(login(user));
+      }
+      dispatch(isAuthReady());
+    });
+  }, []);
 
-  return <RouterProvider router={routes} />;
+  return <>{authReady && <RouterProvider router={routes} />}</>;
 }
 
 export default App;

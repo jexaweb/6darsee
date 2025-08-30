@@ -1,14 +1,12 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useActionData } from "react-router-dom";
 import { Form } from "react-router-dom";
 import { Link } from "react-router-dom";
 import FormInput from "../components/FormInput";
-import { useEffect } from "react";
+
 import { MdEmail } from "react-icons/md";
 import { RiLockPasswordLine } from "react-icons/ri";
 import { useLogin } from "../hooks/useLogin";
-import { useState } from "react";
-import { loginError } from "../components/LoginError";
 
 export async function action({ request }) {
   const formData = await request.formData();
@@ -17,32 +15,30 @@ export async function action({ request }) {
   return data;
 }
 
-// function Login() {
-//   const user = useActionData();
-//   const [error, setError] = useState(null);
-//   const { login } = useLogin();
-//   useEffect(() => {
-//     if (user?.name && user?.email) {
-//       login(user.name, user.email);
-//       setError(false);
-//     } else {
-//       setError(user ? formatProdErrorMessage(user) : false);
-//     }
-//   }, [user]);
-// }
-
 function Login() {
+  const { _login, error: _error, isPending } = useLogin();
   const user = useActionData();
   const [error, setError] = useState(null);
-  const { login } = useLogin();
+
   useEffect(() => {
-    if (user?.password && user?.email) {
-      login(user.password, user.email);
+    if (user?.email && user?.password) {
+      _login(user.email, user.password);
       setError(false);
     } else {
-      setError(user ? loginError(user) : false);
+      setError(user ? formError(user) : false);
     }
   }, [user]);
+  useEffect(() => {
+    if (error) {
+      alert(error);
+    }
+  }, [error]);
+
+  useEffect(() => {
+    if (_error) {
+      alert(_error);
+    }
+  }, [_error]);
 
   return (
     <div
@@ -95,16 +91,30 @@ function Login() {
                 Forgot password?
               </Link>
             </div>
-            <button
-              className="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm 
+            {!isPending && (
+              <button
+                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm 
                          text-sm font-medium text-white 
                          bg-gradient-to-r from-blue-600 to-purple-600 
                          hover:from-blue-700 hover:to-purple-700 
                          focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500
                          transform hover:scale-105 transition duration-200 ease-in-out"
-            >
-              Login
-            </button>
+              >
+                Login
+              </button>
+            )}
+            {isPending && (
+              <button
+                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm 
+                         text-sm font-medium text-white 
+                         bg-gradient-to-r from-blue-600 to-purple-600 
+                         hover:from-blue-700 hover:to-purple-700 
+                         focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500
+                         transform hover:scale-105 transition duration-200 ease-in-out"
+              >
+                Loading...
+              </button>
+            )}
             <p className="text-sm text-center text-gray-600 dark:text-gray-400">
               Don't have an account?{" "}
               <Link
@@ -116,6 +126,7 @@ function Login() {
             </p>
           </Form>
           <div>{error && <p style={{ color: "red" }}>{error}</p>}</div>
+          <div>{_error && <p style={{ color: "red" }}>{_error}</p>}</div>
         </div>
       </div>
     </div>

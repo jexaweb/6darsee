@@ -21,19 +21,7 @@ export async function action({ request }) {
 
   return data;
 }
-// function Register() {
-//   const user = useActionData();
-//   const [error, setError] = useState(null);
-//   const { register } = useRegister();
-//   useEffect(() => {
-//     if (user?.name && user?.email && user?.password) {
-//       register(user.name, user.email, user.password);
-//       setError(false);
-//     } else {
-//       setError(user ? formatProdErrorMessage(user) : false);
-//     }
-//   }, [user]);
-// }
+
 function Register() {
   const user = useActionData();
   const [error, setError] = useState(null);
@@ -46,6 +34,17 @@ function Register() {
       setError(user ? formError(user) : false);
     }
   }, [user]);
+  useEffect(() => {
+    if (error) {
+      alert(error);
+    }
+  }, [error]);
+
+  useEffect(() => {
+    if (_error) {
+      alert(_error);
+    }
+  }, [_error]);
 
   return (
     <div
